@@ -24,7 +24,7 @@ public:
 	virtual ~Debugger();
 	bool dispatchCommand(char *cmd);
   char* getExceptionName(int exception);
-  char* decodeInstr(Word d, Dword pc);
+  char* disasmInstr(Word d, Dword pc);
 
 	bool promptOn;
 

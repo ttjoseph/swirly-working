@@ -65,7 +65,7 @@ void Debugger::flamingDeath(char *fmt, ...)
 	{
 //		disasmOn = true;
 		Word d = cpu->mmu->fetchInstruction(cpu->PC);
-		printf("%08X: %04x: %s", cpu->PC, d, decodeInstr(d, cpu->PC));		
+		printf("%08X: %04x: %s", cpu->PC, d, disasmInstr(d, cpu->PC));		
 //		printf("%08X: %04x: ", cpu->PC, d);
 //		cpu->executeInstruction(d);
 	}
@@ -153,8 +153,8 @@ void Debugger::checkExecBp()
 {
 	if(execBpSet == false)
 		return;
-
-	for(int i=0;i<(maxExecBp+1);i++)
+		
+	for(int i=0;i<=maxExecBp;i++)
 	{
 		if(breakpoints[i].valid && breakpoints[i].type == DBG_BP_EXECUTION &&
 			(cpu->PC == breakpoints[i].addr))
@@ -178,12 +178,7 @@ bool Debugger::prompt()
 	{
 		dumpRegs();
 		d = cpu->mmu->fetchInstruction(cpu->PC);
-		printf("%08x: %04x: %s -> ", cpu->PC, d, decodeInstr(d, cpu->PC));
-		// disasmOn = true;
-		// cpu->executeInstruction(d);
-		// disasmOn = false;
-		// printf("  -> ");	
-		// disasmOn = false;
+		printf("%08x: %04x: %s -> ", cpu->PC, d, disasmInstr(d, cpu->PC));
 		cpu->overlord->getString(userInput, 511);
 		return dispatchCommand(userInput);
 	} else
@@ -542,7 +537,7 @@ bool Debugger::cmdR(char *cmd)
 bool Debugger::cmdUf(char *cmd)
 {
 	Word d = cpu->mmu->fetchInstruction(cpu->PC + 2);
-	printf("%08x: %04x: %s\n", cpu->PC, d, decodeInstr(d, cpu->PC));
+	printf("%08x: %04x: %s\n", cpu->PC, d, disasmInstr(d, cpu->PC));
 	return false;
 }
 
@@ -588,6 +583,7 @@ void Debugger::updateMaxBp(int type, int *max)
 		if((breakpoints[i].valid == true) && (breakpoints[i].type == type))
 			*max = i;
 	}
+	promptOn=true;
 }
 
 // retrieves a pointer to the name of an exception
@@ -603,7 +599,7 @@ char* Debugger::getExceptionName(int exception)
 	return "[Unknown exception]";
 }
 
-char* Debugger::decodeInstr(Word d, Dword pc)
+char* Debugger::disasmInstr(Word d, Dword pc)
 {
 	return decode(d, pc, "There's a bug in Debugger.cpp", 1, pc);
 }

@@ -46,6 +46,8 @@ typedef unsigned long u_dcint;
 extern "C" {
 #endif
 char* decode(u_dcshort opcode, u_dcint cur_PC, char *file, int size, int start_address);
+u_dcshort char2short(unsigned char *buf);
+u_dcint char2int(unsigned char *buf);
 #ifdef __cplusplus
 }
 #endif

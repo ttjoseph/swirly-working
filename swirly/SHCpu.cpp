@@ -2388,7 +2388,6 @@ void SHCpu::go()
 	{
 		if(debugger->prompt())
 		{
-			//tmu->iterate();
 			d = mmu->fetchInstruction(PC);
 			executeInstruction(d);
 			numIterations++;
