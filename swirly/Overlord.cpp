@@ -246,6 +246,7 @@ void Overlord::copyFromHost(SHCpu *cpu, Dword dest, void *src, Dword len)
 }
 
 // loads an SREC format file
+// FIXME: this sucks
 bool Overlord::loadSrec(char *fname)
 {
 	FILE *fp = fopen(fname, "rb");
@@ -298,7 +299,7 @@ bool Overlord::loadSrec(char *fname)
 				break;
 			}
 		case '7': // execution start address
-			break; // XXX: we don't care
+			return false; // break; // XXX: we don't care
 		default:
 			printf("Overlord::loadSrec: Unknown SREC block type S%c\n", type[1]);
 			return false;
