@@ -27,8 +27,9 @@ public:
   char* getExceptionName(int exception);
   char* disasmInstr(Word d, Dword pc);
 	void reportBranch(char *tag, Dword src, Dword dest);
+	void print(char *fmt, ...);
 
-	bool promptOn;
+	bool promptOn, showStatusMessages;
 
 private:
 	Debugger() {}
@@ -70,6 +71,7 @@ private:
 	bool cmdBx(char *cmd);
 	bool cmdD(char *cmd);
   bool cmdUf(char *cmd);
+	bool cmdStat(char *cmd);
 
 
 };

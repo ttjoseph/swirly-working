@@ -1,5 +1,6 @@
 #include "Maple.h"
 #include "Overlord.h"
+#include "Debugger.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -34,7 +35,7 @@ Dword Maple::hook(int eventType, Dword addr, Dword data)
 			return 1; // hack
 
 		case 0xa05f6c18: // Maple DMA
-			printf("Maple: check DMA status, PC=%08X\n", cpu->PC);
+			cpu->debugger->print("Maple: check DMA status, PC=%08X\n", cpu->PC);
 			return 0; // hack, pretend DMA is done
 
 		default:
@@ -49,9 +50,9 @@ Dword Maple::hook(int eventType, Dword addr, Dword data)
 				return 0;
 			case 0xa05f6c14: // Maple enable
 				if(data & 1)
-					printf("Maple: enabled\n");
+					cpu->debugger->print("Maple: enabled\n");
 				else
-					printf("Maple: disabled\n");
+					cpu->debugger->print("Maple: disabled\n");
 				return 0;
 			case 0xa05f6c18: // DMA start
 				if(data & 1) // if bit 0 is set, begin transfer
@@ -73,20 +74,20 @@ Dword Maple::hook(int eventType, Dword addr, Dword data)
 					Dword resultAddr = Overlord::bits(transferDesc2, 28, 5) << 5;
 
 					/*
-					printf("Maple: DMA transfer from %08X: ", dmaAddr);
-					printf("last %d, port %d, length %d ", last, port, length);
-					printf("Result addr: %08X\n", transferDesc2);
-					printf("Maple: command %08X: ", frameHeader);
-					printf("cmd: %d ", cmd);
-					printf("recipient: %d ", recipient);
-					printf("sender: %d ", sender);
-					printf("addtl words: %d\n", addtlwords);
+					cpu->debugger->print("Maple: DMA transfer from %08X: ", dmaAddr);
+					cpu->debugger->print("last %d, port %d, length %d ", last, port, length);
+					cpu->debugger->print("Result addr: %08X\n", transferDesc2);
+					cpu->debugger->print("Maple: command %08X: ", frameHeader);
+					cpu->debugger->print("cmd: %d ", cmd);
+					cpu->debugger->print("recipient: %d ", recipient);
+					cpu->debugger->print("sender: %d ", sender);
+					cpu->debugger->print("addtl words: %d\n", addtlwords);
 					*/
 
 					switch(cmd)
 					{
 					case MAPLE_REQ_DEVICE_INFO:
-						printf("Maple: request device info of %02x (on port %d)\n", recipient, Overlord::bits(recipient, 7, 6));
+						cpu->debugger->print("Maple: request device info of %02x (on port %d)\n", recipient, Overlord::bits(recipient, 7, 6));
 						// XXX: we're going to pretend that our gamepad is connected to every
 						// address on the maple bus with the exception of where the DC itself would be
 						if((recipient & 0x1f) != 0) // if it isn't the DC itself...
@@ -97,19 +98,18 @@ Dword Maple::hook(int eventType, Dword addr, Dword data)
 						break;
 
 					case MAPLE_GET_CONDITION:
-						printf("Maple: get condition of %02x (on port %d)\n", recipient, Overlord::bits(recipient, 7, 6));
+						cpu->debugger->print("Maple: get condition of %02x (on port %d)\n", recipient, Overlord::bits(recipient, 7, 6));
 						break;
 					}
 				}
 				return 0;
 			case 0xa05f6c80: // timeout / speed
-				printf("Maple: timeout set to %d\n", data >> 16);
+				cpu->debugger->print("Maple: timeout set to %d\n", data >> 16);
 				return 0;
 			case 0xa05f6c8c: // unknown - a magic value is usually written to this
-				printf("Maple: register 8c written with %08x\n", data);
+				cpu->debugger->print("Maple: register 8c written with %08x\n", data);
 				return 0;
 		}
 	}
 	return 0xbeefbeef;
-
 }

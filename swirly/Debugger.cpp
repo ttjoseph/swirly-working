@@ -33,12 +33,7 @@ Overlord::NumberName exceptionList[] =
 	{-1, "[-1 is not an exception]"}
 };
 
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-Debugger::Debugger(class SHCpu *shcpu) : cpu(shcpu), branchTraceFile(NULL)
+Debugger::Debugger(class SHCpu *shcpu) : showStatusMessages(true), cpu(shcpu), branchTraceFile(NULL)
 {
 	// create the breakpoint list
 	breakpoints = new Breakpoint[DBG_MAXBREAKPOINTS];
@@ -56,6 +51,17 @@ Debugger::~Debugger()
 	if(branchTraceFile)
 		fclose(branchTraceFile);
 	delete breakpoints;
+}
+
+void Debugger::print(char *fmt, ...)
+{
+	if(showStatusMessages)
+	{
+		va_list mrk;
+		va_start(mrk, fmt);
+		vprintf(fmt, mrk);
+		va_end(mrk);
+	}
 }
 
 // we want to keep these from ever occurring...
@@ -238,9 +244,10 @@ bool Debugger::dispatchCommand(char *cmd)
 	DO_CMD("df", cmdDf);
 	DO_CMD("uf", cmdUf);
 	DO_CMD("trb", cmdTrb);
+	DO_CMD("stat", cmdStat);
 
 #undef DO_CMD
-	
+
 	printf("%s: What does that mean?\n", firstToken);
 	return 0;
 }
@@ -343,12 +350,25 @@ bool Debugger::cmdD(char *cmd)
 	return false;
 }
 
+// toggle reporting of status messages on and off
+bool Debugger::cmdStat(char *cmd)
+{
+	showStatusMessages = !showStatusMessages;
+	// yeah this is kinda pointless - so sue me
+	printf("Status messages turned o");
+	if(showStatusMessages)
+		printf("n.\n");
+	else
+		printf("ff.\n");
+	return false;
+}
+
 // toggle branch tracing on and off
 bool Debugger::cmdTrb(char *cmd)
 {
 	if(branchTraceFile)
 	{
-		fprintf(branchTraceFile, 
+		fprintf(branchTraceFile,
 			"--> PC=%08X: Branch trace logging turned off <--\n", cpu->PC);
 		fclose(branchTraceFile);
 		branchTraceFile = NULL;
@@ -356,7 +376,7 @@ bool Debugger::cmdTrb(char *cmd)
 	} else
 	{
 		branchTraceFile = fopen("branch_trace.log", "a");
-		fprintf(branchTraceFile, 
+		fprintf(branchTraceFile,
 			"--> PC=%08X: Branch trace logging turned on <--\n", cpu->PC);
 		printf("Branch trace logging is on.\n");
 	}

@@ -101,7 +101,7 @@ syscall_8c0000b4:
 	.align 4
 romfont_addr: .long romfont
 
-
+! syscall - 8c0000e0
 	.align 4
 syscall_8c0000e0:
 	mov #1, r5
@@ -119,6 +119,7 @@ syscall_8c0000e0:
 	.align 4
 	sce0_jump_addr: .long 0x8c010000
 
+! generic error handler for unimplemented syscalls
 	.align 4
 syscall_error_handler:
 	mova seh_error_msg, r0
@@ -133,10 +134,10 @@ syscall_error_handler:
 	seh_error_msg: .asciz "fakebootrom: Unimplemented syscall\n"
 
 
-	! This routine by Marcus
-	! Send a NUL-terminated string to the serial port
-	!
-	! r4 = string
+! This routine by Marcus
+! Send a NUL-terminated string to the serial port
+!
+! r4 = string
 	.align 4
 send_str:
 	mov	#-24,r2
@@ -160,10 +161,10 @@ send_str:
 	nop
 	rts
 
-	! This routine by Marcus
-	! Send a single character to the serial port
-	!
-	! r4 = character
+! This routine by Marcus
+! Send a single character to the serial port
+!
+! r4 = character
 send:
 	mov	#-24,r2
 	shll16	r2

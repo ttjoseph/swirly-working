@@ -608,7 +608,7 @@ Dword SHMmu::access(Dword externalAddr, int accessType)
 				case 0x8000: return(tempData = cpu->gpu->hook(eventType, accessAddr, tempData));
 				case 0x6000: return(tempData = cpu->maple->hook(eventType, accessAddr, tempData));
 				default:
-					printf("SHMmu::access: can't handle access to external addr %08X, PC=%08X\n", externalAddr, cpu->PC);
+					cpu->debugger->print("SHMmu::access: can't handle access to external addr %08X, PC=%08X\n", externalAddr, cpu->PC);
 					return 0xdeadbeef;
 				}
 				break;

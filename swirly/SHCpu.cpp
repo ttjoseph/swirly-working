@@ -70,12 +70,12 @@ void SHCpu::dispatchSwirlyHook()
 		break;
 	case HOOK_LOAD1STREAD:
 	{
-		printf("**** loading 1ST_READ.BIN ***\n");
+		debugger->print("**** loading 1ST_READ.BIN ***\n");
 
 		int startoffs = (R[4] - gdrom->startSector)* gdrom->sectorSize;
-		printf("startoffs = %d\n", startoffs);
+		debugger->print("startoffs = %d\n", startoffs);
 		Overlord::loadAndDescramble(gdrom->cdImage, startoffs, R[5], this, 0x8c010000);
-		printf("**** done loading 1ST_READ.BIN ****\n");
+		debugger->print("**** done loading 1ST_READ.BIN ****\n");
 	}
 		break;
 	default:
@@ -87,7 +87,7 @@ void SHCpu::dispatchSwirlyHook()
 
 void SHCpu::unknownOpcode()
 {
-	printf("SHCpu: encountered unknown upcode at PC=%08X\n", PC);
+	debugger->print("SHCpu: encountered unknown upcode at PC=%08X\n", PC);
 	PC+=2;
 }
 
@@ -2125,7 +2125,7 @@ void SHCpu::delaySlot()
 	*/	
 	
 	//if(debugger->disasmOn)
-	//	printf("[DELAY SLOT: ");
+	//	debugger->print("[DELAY SLOT: ");
 	d = mmu->fetchInstruction(PC+2);
 	// only check for slot illegal if we're actually executing
 	/*
@@ -2177,7 +2177,7 @@ void SHCpu::delaySlot()
 
 	executeInstruction(d);
 //	if(debugger->disasmOn)
-//		printf("] ");
+//		debugger->print("] ");
 }
 
 void SHCpu::reset()

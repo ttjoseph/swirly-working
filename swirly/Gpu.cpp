@@ -48,11 +48,11 @@ Dword Gpu::hook(int eventType, Dword addr, Dword data)
 		return 0;
 
 	case MMU_READ_DWORD:
-//		printf("GPU read %08X  data: %08x  PC: %08X\n", addr, data, cpu->PC);
+//		cpu->debugger->print("GPU read %08X  data: %08x  PC: %08X\n", addr, data, cpu->PC);
 		return accessReg(REG_READ, addr, data);
 
 	case MMU_WRITE_DWORD:
-//		printf("GPU write %08X  data: %08x  PC: %08x\n", addr, data, cpu->PC);
+//		cpu->debugger->print("GPU write %08X  data: %08x  PC: %08x\n", addr, data, cpu->PC);
 		accessReg(REG_WRITE, addr, data);
 		return 0;
 	}
@@ -102,14 +102,14 @@ Dword Gpu::accessReg(int operation, Dword addr, Dword data)
 		{
 		case 0xa05f8014: // Flush TA pipeline - begin render
 			// we defer flushing the OpenGL pipeline until we're about to swap buffers
-//			printf("Gpu: Flush TA pipeline\n");
+//			cpu->debugger->print("Gpu: Flush TA pipeline\n");
 			break;
 
 		case 0xa05f80a8: // magic TA register
 			// we are now in 3D land...
 			if(data == 0x15d1c951) // what on earth is this?
 			{
-				printf("Gpu::accessReg: TA enabled.\n");
+				cpu->debugger->print("Gpu::accessReg: TA enabled.\n");
 				setupGL();
 			}
 		}
@@ -173,7 +173,7 @@ void Gpu::makeScreen()
 		if((backBufferDCAddrs[bbNum] == vidbase) && 
 			(backBuffers[bbNum]->format->BitsPerPixel == bpp))
 		{
-			printf("Gpu::makeScreen: Reused backbuffer %d.\n", bbNum);
+			cpu->debugger->print("Gpu::makeScreen: Reused backbuffer %d.\n", bbNum);
 			backBuffer = backBuffers[bbNum];
 			currentBackBuffer = bbNum;
 			return;
@@ -183,8 +183,8 @@ void Gpu::makeScreen()
 	if(bbNum >= MAXBACKBUFFERS)
 		cpu->debugger->flamingDeath("Gpu::makeScreen: too many back buffers allocated!");
 
-	printf("Gpu::makeScreen: resetting video mode - ");
-	printf("new back buffer video base: %08X\n", vidbase);
+	cpu->debugger->print("Gpu::makeScreen: resetting video mode - ");
+	cpu->debugger->print("new back buffer video base: %08X\n", vidbase);
 
 	backBuffers[bbNum] = SDL_CreateRGBSurfaceFrom(
 		(void*)(((Dword)cpu->mmu->videoMem)+vidbase),
@@ -259,7 +259,7 @@ void Gpu::handleTaWrite(Dword addr, Dword data)
 				withinList = true;
 			}
 			withinList = true;
-			/*printf("TA: vertex (%.2f %.2f %.2f) RGBA: %.2f %.2f %.2f %.2f\n", 
+			/*cpu->debugger->print("TA: vertex (%.2f %.2f %.2f) RGBA: %.2f %.2f %.2f %.2f\n", 
 				recvBuf[1], 
 				recvBuf[2], 
 				recvBuf[3],
@@ -273,24 +273,24 @@ void Gpu::handleTaWrite(Dword addr, Dword data)
 			glVertex3f(recvBuf[1], recvBuf[2], -1.0f * recvBuf[3]);
 			break;
 		case 0: // End of list
-	//		printf("TA: end of list\n");
+	//		cpu->debugger->print("TA: end of list\n");
 			glEnd();
 			withinList = false;
 			break;
 		case 1: // user clip
-			printf("TA: User clip is %f %f %f %f\n", 
+			cpu->debugger->print("TA: User clip is %f %f %f %f\n", 
 				recvBuf[4], 
 				recvBuf[5], 
 				recvBuf[6], 
 				recvBuf[7]);
-			//printf("hit a key");
+			//cpu->debugger->print("hit a key");
 			//getchar();
 			break;
 		case 4: // polygon / modifier volume
-		//	printf("TA: Polygon / modifier volume\n");
+		//	cpu->debugger->print("TA: Polygon / modifier volume\n");
 			break;
 		default: // hmm...
-			printf("TA: *** unimplemented TA command\n");
+			cpu->debugger->print("TA: *** unimplemented TA command\n");
 		}
 	}
 }

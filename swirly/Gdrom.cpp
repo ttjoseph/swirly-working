@@ -18,7 +18,7 @@ void Gdrom::hook()
 {
 	if(cpu->R[6] != 0)
 	{
-		printf("Gdrom::hook: r6 != 0 so doing nothing.\n");
+		cpu->debugger->print("Gdrom::hook: r6 != 0 so doing nothing.\n");
 		return;
 	}
 
@@ -26,34 +26,34 @@ void Gdrom::hook()
 	{
 		case GDROM_EXECSERVER:
 			// start executing commands
-			printf("Gdrom: syscall: GDROM_EXECSERVER\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_EXECSERVER\n");
 			break;
 		case GDROM_INITSYSTEM:
 			// this is a nop for us
-			printf("Gdrom: syscall: GDROM_INITSYSTEM\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_INITSYSTEM\n");
 			break;
 		case GDROM_GETDRVSTAT:
 			// get type of disc
 			// r4 = addr of param block
 			// XXX: what is the structure of the param block?
-			printf("Gdrom: syscall: GDROM_GETDRVSTAT\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_GETDRVSTAT\n");
 			// we'll pretend we have an XA disc
 			cpu->mmu->writeDword(cpu->R[4]+4, 32);
 			break;
 		case GDROM_G1DMAEND:
-			printf("Gdrom: syscall: GDROM_G1DMAEND\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_G1DMAEND\n");
 			break;
 		case GDROM_REQDMATRANS:
-			printf("Gdrom: syscall: GDROM_REQDMATRANS\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_REQDMATRANS\n");
 			break;
 		case GDROM_CHECKDMATRANS:
-			printf("Gdrom: syscall: GDROM_CHECKDMATRANS\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_CHECKDMATRANS\n");
 			break;
 		case GDROM_READABORT:
-			printf("Gdrom: syscall: GDROM_READABORT\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_READABORT\n");
 			break;
 		case GDROM_RESET:
-			printf("Gdrom: syscall: GDROM_RESET\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_RESET\n");
 			break;
 		case GDROM_CHANGEDATATYPE:
 			// sets the format of the disc
@@ -63,7 +63,7 @@ void Gdrom::hook()
 			// param[2]: 2048 = mode1, 1024=mode2
 			// param[3]: sector size
 			// r4 = addr of param block
-			printf("Gdrom: syscall: GDROM_CHANGEDATATYPE\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_CHANGEDATATYPE\n");
 			{
 				int operation = cpu->mmu->readDword(cpu->R[4]);
 				if(operation == 1)
@@ -78,17 +78,17 @@ void Gdrom::hook()
 			// r5 = addr of param block
 			// return 1 if still pending
 			// return 2 if done
-			printf("Gdrom: syscall: GDROM_GETCMDSTAT\n");
+			cpu->debugger->print("Gdrom: syscall: GDROM_GETCMDSTAT\n");
 			cpu->R[0] = 2;
 			break;
 		case GDROM_REQCMD:
 			// adds a command to the GDROM command queue?
 			// r4=cmd, r5=addr of param block
-			printf("Gdrom: syscall: GDROM_REQCMD ");
+			cpu->debugger->print("Gdrom: syscall: GDROM_REQCMD ");
 			switch(cpu->R[4])
 			{
 				case GDROM_CMD_INIT:
-					printf("GDROM_CMD_INIT");
+					cpu->debugger->print("GDROM_CMD_INIT");
 					break;
 				case GDROM_CMD_READTOC:
 					// param[0] = session
@@ -100,11 +100,11 @@ void Gdrom::hook()
 					// ctrl is found in the high 4 bits of track num
 					// LBA is the lower 3 bytes.  To get real sector number
 					// from LBA, add 150.
-					printf("Gdrom: syscall: GDROM_CMD_READTOC");
+					cpu->debugger->print("Gdrom: syscall: GDROM_CMD_READTOC");
 					{
 						//Dword session = cpu->mmu->readDword(cpu->R[5]);
 						Dword tocBuffer = cpu->mmu->readDword(cpu->R[5]+4);
-						printf(" tocBuffer is at %08x", tocBuffer);
+						cpu->debugger->print(" tocBuffer is at %08x", tocBuffer);
 
 						Toc toc;
 						toc.first = 1 << 16;
@@ -121,29 +121,29 @@ void Gdrom::hook()
 					// param[1] = number of sectors
 					// param[2] = pointer to buffer
 					// param[3] = ?
-					printf("GDROM_CMD_READSECTORS");
+					cpu->debugger->print("GDROM_CMD_READSECTORS");
 					// we put these braces here so the compiler doesn't complain about
 					// variable initialization and scope
 					{
 						Dword start = cpu->mmu->readDword(cpu->R[5]);
 						Dword count = cpu->mmu->readDword(cpu->R[5]+4);
 						Dword buffer = cpu->mmu->readDword(cpu->R[5]+8);
-						printf(" start %u count %u buffer %08x sectorSize %d", start, count, buffer, sectorSize);
+						cpu->debugger->print(" start %u count %u buffer %08x sectorSize %d", start, count, buffer, sectorSize);
 						count *= sectorSize;
 						start -= startSector;
 						start *= sectorSize;
-						printf(" really starting at %u bytes", start);
+						cpu->debugger->print(" really starting at %u bytes", start);
 						if(cdImage != NULL)
 							Overlord::load(cdImage, start, count, cpu, buffer);
 						else
-							printf("cdImage is null");
+							cpu->debugger->print("cdImage is null");
 					}
 					break;
 				default:
-					printf("Unknown command %d", cpu->R[4]);
-					break;					
+					cpu->debugger->print("Unknown command %d", cpu->R[4]);
+					break;
 			}
-			printf("\n");
+			cpu->debugger->print("\n");
 			break;
 	}
 }

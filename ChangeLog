@@ -11,6 +11,9 @@
 	  B[FT]/S checks SR.T
 	- Added incomplete ROM font that only has ASCII glyphs and only space for
 	  first 288 (narrow) characters allocated
+	- Added "stat" command to debugger, which toggles status messages on and off
+	- This required making a print() function in Debugger that should now be
+	  used for debugging-type status info instead of printf
 15 April 2001
 	- Integrated Lars Olsson's dcdis, using it as the disassembler.  This allows
 	  the removal of the stupid Debugger::disasmOn variable as well as the stupid
