@@ -1,0 +1,17 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if you have the <GL/gl.h> header file.  */
+#undef HAVE_GL_GL_H
+
+/* Define if you have the <SDL/SDL.h> header file.  */
+#undef HAVE_SDL_SDL_H
+
+/* Name of package */
+#undef PACKAGE
+
+/* Version number of package */
+#undef VERSION
+
+/* C++ compiler supports template repository */
+#undef HAVE_TEMPLATE_REPOSITORY
+
