@@ -116,7 +116,7 @@ Word SHMmu::fetchInstruction(Dword addr)
 {
 	unsigned int theentry;
 	Dword lrui, utlbentry;
-	
+
 	eventType = MMU_READ_WORD;
 	
 	switch(addr >> 29) // check which area we want
@@ -150,7 +150,7 @@ Word SHMmu::fetchInstruction(Dword addr)
 						theentry = 3;
 					else
 						cpu->debugger->flamingDeath("MMUCR.LRUI is set to some weird setting!");
-					
+
 					ITLB_Addr[theentry] = UTLB_Addr[utlbentry];
 					ITLB_Data1[theentry] = UTLB_Data1[utlbentry];
 					ITLB_Data2[theentry] = UTLB_Data2[utlbentry];
@@ -252,7 +252,7 @@ Word SHMmu::fetchInstruction(Dword addr)
 	return 0; // shouldn't ever reach here
 }
 
-// translates an SH virtual address to an offset in mem
+// translates an SH virtual address to an external address
 Dword SHMmu::translateVirtual(Dword addr)
 {
 	cpu->debugger->checkMemBp(addr);
@@ -572,12 +572,10 @@ Dword SHMmu::accessP4()
 	return tempData;
 }
 
-// kitchen-sink function to perform a memory access
+// kitchen-sink function to perform a memory access given an external address
 // accepts and returns data in this->tempData
 Dword SHMmu::access(Dword externalAddr, int accessType)
 {
-	// translateVirtual should return a physical address for all except
-	// P4 / area 7
 	Dword realAddr = 0;
 
 	// TODO: check for exceptions

@@ -70,12 +70,12 @@ void SHCpu::dispatchSwirlyHook()
 		break;
 	case HOOK_LOAD1STREAD:
 	{
-		debugger->print("**** loading 1ST_READ.BIN ***\n");
+		debugger->print("HOOK_LOAD1STREAD: loading 1ST_READ.BIN\n");
 
-		int startoffs = (R[4] - gdrom->startSector)* gdrom->sectorSize;
-		debugger->print("startoffs = %d\n", startoffs);
+		int startoffs = (R[4] - gdrom->startSector())* gdrom->sectorSize;
+		debugger->print("HOOK_LOAD1STREAD: startoffs = %08x = %d * %d\n", startoffs, gdrom->startSector(), gdrom->sectorSize);
 		Overlord::loadAndDescramble(gdrom->cdImage, startoffs, R[5], this, 0x8c010000);
-		debugger->print("**** done loading 1ST_READ.BIN ****\n");
+		debugger->print("HOOK_LOAD1STREAD: done loading 1ST_READ.BIN\n");
 	}
 		break;
 	default:
@@ -258,6 +258,32 @@ void SHCpu:: STSMPR(int n)
 {
 	mmu->writeDword(R[n]-4, PR);
 	R[n]-=4;
+	PC+=2;
+}
+
+void SHCpu::STSFPSCR(int n)
+{
+	R[n] = FPSCR & 0x003fffff;
+	PC+=2;
+}
+
+void SHCpu::STSFPUL(int n)
+{
+	R[n] = *((Dword*) &FPUL);
+	PC+=2;
+}
+
+void SHCpu::STSMFPSCR(int n)
+{
+	R[n]-=4;
+	mmu->writeDword(R[n], FPSCR & 0x003fffff);
+	PC+=2;
+}
+
+void SHCpu:: STSMFPUL(int n)
+{
+	R[n]-=4;
+	mmu->writeFloat(R[n], FPUL);
 	PC+=2;
 }
 
@@ -1019,7 +1045,7 @@ void SHCpu:: DO_MACL(int m, int n)
 	PC+=2;
 }
 
-	
+
 void SHCpu:: LDSFPSCR(int n)
 {
 	setFPSCR(R[n] & 0x003fffff);
@@ -1752,7 +1778,6 @@ void SHCpu::FMOV(int m, int n)
 {
 	FPU_DP_FIX_MN();
 
-
 	if(FPU_DP())
 		DR[n]=DR[m];
 	else
@@ -1763,7 +1788,7 @@ void SHCpu::FMOV(int m, int n)
 
 void SHCpu::FMOV_STORE(int m, int n)
 {
-	FPU_DP_FIX_M();
+	FPU_DP_FIX_MN();
 
 	if(FPU_DP()) // double-precision
 		mmu->writeDouble(R[n], DR[m]);
@@ -1775,7 +1800,6 @@ void SHCpu::FMOV_STORE(int m, int n)
 void SHCpu::FMOV_LOAD(int m, int n)
 {
 	FPU_DP_FIX_N();
-	
 
 	if(FPU_DP()) // double-precision
 		DR[n] = mmu->readDouble(R[m]);
@@ -1902,10 +1926,6 @@ void SHCpu::FLDI0(int n)
 
 void SHCpu::FLDI1(int n)
 {
-
-	// somehow this converts the immediate value
-	// to an int, even though FR is a float...i think...
-	//FR[n] = 0x3f800000;
 	FR[n] = 1.0f;
 	PC+=2;
 }
@@ -1932,7 +1952,6 @@ void SHCpu::FLOAT(int n)
 
 void SHCpu::FMAC(int m, int n)
 {
-
 	FR[n] = (FR[0] * FR[m]) + FR[n];
 	PC+=2;
 }
@@ -1984,7 +2003,7 @@ void SHCpu::FMOV_INDEX_LOAD_XD(int m, int n)
 void SHCpu::FMOV_INDEX_STORE_XD(int m, int n)
 {
 	FPU_DP_FIX_M();
-	
+
 	mmu->writeDouble(R[0]+R[n], XD[m]);
 	PC+=2;
 }
@@ -2025,11 +2044,9 @@ void SHCpu::FNEG(int n)
 {
 	FPU_DP_FIX_N();
 	if(FPU_DP())
-	///	*(((Qword*)DR)+n) ^= 0x8000000000000000;
 		DR[n] = -DR[n];
 	else
 		FR[n] = -FR[n];
-		//*(((Dword*) FR)+n) ^= 0x80000000;
 	PC+=2;
 }
 
@@ -2115,69 +2132,62 @@ void SHCpu::delaySlot()
 
 	/*
 	Slot illegal instructions:
-	
-	JMP JSR BRA BRAF BSR BSRF
-	RTS RTE BT/S BF/S 0xFFFD
-	BT BF	TRAPA MOVA LDC Rm, SR LDC.L @Rm+, SR
-	
+
+	JMP JSR BRA BRAF BSR BSRF RTS RTE BT/S BF/S 0xFFFD
+	BT BF	TRAPA MOVA
+	LDC Rm, SR
+	LDC.L @Rm+, SR
+
 	PC-relative MOV instructions
-	
-	*/	
-	
-	//if(debugger->disasmOn)
-	//	debugger->print("[DELAY SLOT: ");
+	*/
+
 	d = mmu->fetchInstruction(PC+2);
 	// only check for slot illegal if we're actually executing
 	/*
 	// XXX: since we don't have exceptions going yet,
 	// no need to try and invoke them!
-	if(!debugger->disasmOn)
+	switch(d&0xf0ff)
 	{
-		switch(d&0xf0ff)
-		{
-		case 0x402b: // JMP
-		case 0x400b: // JSR
-		case 0x0023: // BRAF
-		case 0x0003: // BSRF
-		case 0x400e: // LDC Rm, SR
-		case 0x4007: // LDC @Rm+, SR
-			exception(E_SLOT_ILLEGAL_INSTRUCTION, PC, 0);
-			return;
-		}
-		switch(d&0xff00)
-		{
-		case 0x8b00: // BF
-		case 0x8f00: // BF/S
-		case 0x8900: // BT
-		case 0x8d00: // BT/S
-		case 0xc300: // TRAPA
-		case 0xc700: // MOVAa
-			exception(E_SLOT_ILLEGAL_INSTRUCTION, PC, 0);
-			return;
-		}
-		switch(d&0xf000)
-		{
-		case 0xa000: // BRA
-		case 0xb000: // BSR
-		case 0x9000: // MOVWI
-		case 0xd000: // MOVLI
-			exception(E_SLOT_ILLEGAL_INSTRUCTION, PC, 0);
-			return;
-		}
-		switch(d)
-		{
-		case 0x000b: // RTS
-		case 0x002b: // RTE
-		case 0xfffd: // undefined instruction
-			exception(E_SLOT_ILLEGAL_INSTRUCTION, PC, 0);
-			return;
-		}
+	case 0x402b: // JMP
+	case 0x400b: // JSR
+	case 0x0023: // BRAF
+	case 0x0003: // BSRF
+	case 0x400e: // LDC Rm, SR
+	case 0x4007: // LDC @Rm+, SR
+		exception(E_SLOT_ILLEGAL_INSTRUCTION, PC, d, "Offending opcode");
+		return;
+	}
+	switch(d&0xff00)
+	{
+	case 0x8b00: // BF
+	case 0x8f00: // BF/S
+	case 0x8900: // BT
+	case 0x8d00: // BT/S
+	case 0xc300: // TRAPA
+	case 0xc700: // MOVAa
+		exception(E_SLOT_ILLEGAL_INSTRUCTION, PC, d, "Offending opcode");
+		return;
+	}
+	switch(d&0xf000)
+	{
+	case 0xa000: // BRA
+	case 0xb000: // BSR
+	case 0x9000: // MOVWI
+	case 0xd000: // MOVLI
+		exception(E_SLOT_ILLEGAL_INSTRUCTION, PC, d, "Offending opcode");
+		return;
+	}
+	switch(d)
+	{
+	case 0x000b: // RTS
+	case 0x002b: // RTE
+	case 0xfffd: // undefined instruction
+		exception(E_SLOT_ILLEGAL_INSTRUCTION, PC, d, "Offending opcode");
+		return;
 	}
 	*/
 
 	executeInstruction(d);
-//	if(debugger->disasmOn)
-//		debugger->print("] ");
 }
 
 void SHCpu::reset()
@@ -2208,7 +2218,7 @@ void SHCpu::executeInstruction(Word d)
 	case 0x1000: MOVLS4(getM(d), getI(d), getN(d)); return;
 	case 0x5000: MOVLL4(getM(d), getI(d), getN(d)); return;
 	}
-	
+
 	switch(d & 0xf08f)
 	{
 	case 0x408e: LDCRBANK(getM(d)&0x7, getN(d)); return;
@@ -2216,7 +2226,7 @@ void SHCpu::executeInstruction(Word d)
 	case 0x0082: STCRBANK(getM(d)&0x7, getN(d)); return;
 	case 0x4083: STCMRBANK(getM(d)&0x7, getN(d)); return;
 	}
-	
+
 	switch(d)
 	{
 	case 0x0028: CLRMAC(); return;
@@ -2233,7 +2243,7 @@ void SHCpu::executeInstruction(Word d)
 	case 0x406a: unknownOpcode(); return; // XXX: what is this opcode?!
 	case 0xfffd: dispatchSwirlyHook(); return;
 	}
-	
+
 	switch(d & 0xF00F)
 	{
 	case 0xf000: FADD(getM(d), getN(d)); return;
@@ -2308,8 +2318,7 @@ void SHCpu::executeInstruction(Word d)
 	case 0x200a: XOR(getM(d), getN(d)); return;
 	case 0x200d: XTRCT(getM(d), getN(d)); return;
 	}
-	
-	
+
 	switch(d & 0xFF00)
 	{
 	case 0x8000: MOVBS4(getI(d), getM(d)); return;
@@ -2339,7 +2348,7 @@ void SHCpu::executeInstruction(Word d)
 	case 0xce00: XORM(getI(d)); return;
 
 	}
-	
+
 	switch(d & 0xF0FF)
 	{
 	case 0x0023: BRAF(getN(d)); return;
@@ -2408,23 +2417,26 @@ void SHCpu::executeInstruction(Word d)
 	case 0x000a: STSMACH(getN(d)); return;
 	case 0x001a: STSMACL(getN(d)); return;
 	case 0x002a: STSPR(getN(d)); return;
+	case 0x0062: STSFPSCR(getN(d)); return;
+	case 0x005a: STSFPUL(getN(d)); return;
 	case 0x4002: STSMMACH(getN(d)); return;
 	case 0x4012: STSMMACL(getN(d)); return;
 	case 0x4022: STSMPR(getN(d)); return;
+	case 0x4062: STSMFPSCR(getN(d)); return;
+	case 0x4052: STSMFPUL(getN(d)); return;
 	case 0x401b: TAS(getN(d)); return;
-	
+
 	case 0xf08d: FLDI0(getN(d)); return;
 	case 0xf09d: FLDI1(getN(d)); return;
 	case 0xf02d: FLOAT(getN(d)); return;
 	case 0xf04d: FNEG(getN(d)); return;
 	case 0xf0bd: FCNVDS(getN(d)); return;
 	case 0xf0ad: FCNVSD(getN(d)); return;
+	case 0xf03d: FTRC(getN(d)); return;
 	}
 
 	// Uh-oh; we can't figure out this instruction
-	//if(!debugger->disasmOn)
-	exception(E_GENERAL_ILLEGAL_INSTRUCTION, PC, 0);
-//	else
+	exception(E_GENERAL_ILLEGAL_INSTRUCTION, PC, d, "Offending opcode");
 }
 
 // starts executing instructions
@@ -2432,7 +2444,7 @@ void SHCpu::go()
 {
 	Word d;
 	Dword numIterations = 0;
-	
+
 	for(;;)
 	{
 		if(debugger->prompt())
@@ -2443,21 +2455,30 @@ void SHCpu::go()
 			if((numIterations % 700000) == 0)
 			{
 				// make SDL handle events
-				SDL_Event e;
-				SDL_PollEvent(&e);
+				overlord->handleEvents();
 				gpu->drawFrame();
 			}
 		}
 	}
 }
 
-void SHCpu::exception(Dword type, Dword addr, Dword data)
+void SHCpu::exception(Dword type, Dword addr, Dword data, char *datadesc)
 {
 	exceptionsPending++;
-	debugger->flamingDeath("Received an exception of type 0x%x (%s) at %08X, extra data = %x",
-		type,
-		debugger->getExceptionName(type),
-		addr,
-		data);
+	if(datadesc == 0)
+	{
+		debugger->flamingDeath("Received an exception of type 0x%x (%s) at %08X",
+			type,
+			debugger->getExceptionName(type),
+			addr,
+			data);
+	} else
+	{
+		debugger->flamingDeath("Received an exception of type 0x%x (%s) at %08X.  %s: %08x",
+			type,
+			debugger->getExceptionName(type),
+			addr,
+			datadesc,
+			data);
+	}
 }
-

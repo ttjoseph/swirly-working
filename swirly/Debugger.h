@@ -72,7 +72,7 @@ private:
 	bool cmdD(char *cmd);
   bool cmdUf(char *cmd);
 	bool cmdStat(char *cmd);
-
+	bool cmdF(char *cmd);
 
 };
 

@@ -19,11 +19,11 @@ Gpu::Gpu(class SHCpu *shcpu) : cpu(shcpu)
 	nextBackBuffer = 0;
 	dwordsReceived = 0;
 	dwordsNeeded = 0;
-	
+
 	for(int i=0; i<8; i++)
 	{
 		backBuffers[i] = NULL;
-		backBufferDCAddrs[i] = 0;
+		backBufferDCAddrs[i] = BACKBUFFERUNUSED;
 	}
 	signal(SIGSEGV, SIG_DFL); // try and avoid the SDL parachute
 }
@@ -71,7 +71,7 @@ Dword Gpu::accessReg(int operation, Dword addr, Dword data)
 		handleTaWrite(addr, data);
 		return 0;
 	}
-	
+
 	// first figure out where in the array we want to look
 	if((addr & 0xffff0000) == 0xa05f0000)
 		realaddr = gpuRegs;
@@ -114,7 +114,7 @@ Dword Gpu::accessReg(int operation, Dword addr, Dword data)
 			}
 		}
 		realaddr[regoffs] = data;
-		
+
 		// don't create a new screen unless there's a write to a certain
 		// arbitrary range of GPU registers
 		if(((regoffs >= 0x8044) & (regoffs <= 0x805c)) || (regoffs == 0x80ec))
@@ -166,16 +166,18 @@ void Gpu::makeScreen()
 	// XXX: for now we won't support interlaced mode.
 
 	int bbNum = 0;
-	while((bbNum < MAXBACKBUFFERS) && (backBufferDCAddrs[bbNum] != 0))
+	while((bbNum < MAXBACKBUFFERS) && (backBufferDCAddrs[bbNum] != BACKBUFFERUNUSED))
 	{
 		// XXX: do more extensive checking to make sure we are still in the same
 		// video mode, etc.
-		if((backBufferDCAddrs[bbNum] == vidbase) && 
+		if((backBufferDCAddrs[bbNum] == vidbase) &&
 			(backBuffers[bbNum]->format->BitsPerPixel == bpp))
 		{
-			cpu->debugger->print("Gpu::makeScreen: Reused backbuffer %d.\n", bbNum);
+			cpu->debugger->print("Gpu::makeScreen: Reused backbuffer %d at %08x, bpp = %d.\n", bbNum, vidbase, bpp);
 			backBuffer = backBuffers[bbNum];
 			currentBackBuffer = bbNum;
+			if((screen == NULL) || (screen->format->BitsPerPixel != bpp) || (screen->w != width) || (screen->h != height))
+				setHost2DVideoMode(width, height, bpp);
 			return;
 		}
 		bbNum++;
@@ -199,19 +201,25 @@ void Gpu::makeScreen()
 	backBuffer = backBuffers[bbNum];
 	backBufferDCAddrs[bbNum] = vidbase;
 	currentBackBuffer = bbNum;
-	
+
 	if(screen != NULL)
 		SDL_FreeSurface(screen);
 
-	screen = SDL_SetVideoMode(width, height, bpp, SDL_HWSURFACE);
+	setHost2DVideoMode(width, height, bpp);
 
-	char caption[512];
-	sprintf(caption, "%s - %dx%d %dbpp %s", VERSION_STRING, width, height, bpp, 
-		taEnabled ? "OpenGL" : "");
-	SDL_WM_SetCaption(caption, NULL);
 	if(screen == NULL)
 		return; // we used to return an error here...but no more
 	drawFrame();
+}
+
+bool Gpu::setHost2DVideoMode(int w, int h, int bpp)
+{
+	screen = SDL_SetVideoMode(w, h, bpp, SDL_HWSURFACE);
+	char caption[512];
+	sprintf(caption, "%s - %dx%d %dbpp %s", VERSION_STRING, w, h, bpp,
+		taEnabled ? "OpenGL" : "");
+	SDL_WM_SetCaption(caption, NULL);
+	return (screen != NULL);
 }
 
 void Gpu::recvStoreQueue(Dword *sq)
@@ -327,7 +335,7 @@ void Gpu::getFBSettings(Dword *w, Dword *h, Dword *vidbase, Dword *rm, Dword *gm
 		*rm = 0x1f << 11;
 		*gm = 0x3f << 5;
 		*am = 0;
-		*bpp = 16; 
+		*bpp = 16;
 		break;
 	case 3: // RGBA8888
 		*rm = 0x00ff0000;
@@ -374,11 +382,18 @@ void Gpu::setupGL()
 	{
 		taEnabled = true;
 		if(screen != NULL)
+		{
 			SDL_FreeSurface(screen);
+			screen = NULL;
+		}
 		for(int i=0; i<MAXBACKBUFFERS; i++)
 		{
-			if(this->backBuffers[i] != NULL)
+			if(backBuffers[i] != NULL)
+			{
 				SDL_FreeSurface(backBuffers[i]);
+				backBuffers[i] = NULL;
+				backBufferDCAddrs[i] = BACKBUFFERUNUSED;
+			}
 		}
 		backBuffer = NULL;
 

@@ -8,7 +8,7 @@
 #include "Gdrom.h"
 
 Gdrom::Gdrom(SHCpu *shcpu, int startsector, int sectorsize = 0)
-	: startSector(startsector), sectorSize(sectorsize), cdImage(NULL), cpu(shcpu)
+	: startSector_(startsector), sectorSize(sectorsize), cdImage(NULL), cpu(shcpu)
 { }
 
 Gdrom::~Gdrom()
@@ -110,7 +110,7 @@ void Gdrom::hook()
 						toc.first = 1 << 16;
 						toc.last = 2 << 16;
 						toc.entry[0] = 0;
-						toc.entry[1] = 0x40000000 + startSector;
+						toc.entry[1] = 0x40000000 + startSector_;
 
 						// copy it into SH memory
 						Overlord::copyFromHost(cpu, tocBuffer, (void*)&toc, sizeof(Toc));
@@ -122,15 +122,13 @@ void Gdrom::hook()
 					// param[2] = pointer to buffer
 					// param[3] = ?
 					cpu->debugger->print("GDROM_CMD_READSECTORS");
-					// we put these braces here so the compiler doesn't complain about
-					// variable initialization and scope
 					{
 						Dword start = cpu->mmu->readDword(cpu->R[5]);
 						Dword count = cpu->mmu->readDword(cpu->R[5]+4);
 						Dword buffer = cpu->mmu->readDword(cpu->R[5]+8);
 						cpu->debugger->print(" start %u count %u buffer %08x sectorSize %d", start, count, buffer, sectorSize);
 						count *= sectorSize;
-						start -= startSector;
+						start -= startSector_;
 						start *= sectorSize;
 						cpu->debugger->print(" really starting at %u bytes", start);
 						if(cdImage != NULL)

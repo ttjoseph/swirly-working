@@ -9,8 +9,8 @@
 ! The trapa instruction causes a break in execution on Swirly and does nothing else.
 !
 ! To compile into flat binary format:
-! sh-elf-as -little -o main.o main.s
-! sh-elf-ld -EL --oformat binary -Ttext 0xa0000000 main.o -o fbr.bin
+! sh4-linux-as -little -o main.o main.s
+! sh4-linux-ld -EL --oformat binary -Ttext 0xa0000000 main.o -o fbr.bin
 
 	.global _start
 	.extern romfont
@@ -79,7 +79,7 @@ _start:
 	scb4_where: .long 0x8c0000b4
 	scb4_addr: .long syscall_8c0000b4
 
-	hello_msg: .asciz "Welcome to Swirly.\n"
+	hello_msg: .asciz "fakebootrom: Welcome to Swirly.\n"
 
 	.align 4
 syscall_gdrom: ! at 8c0000bc
@@ -107,6 +107,13 @@ syscall_8c0000e0:
 	mov #1, r5
 	cmp/eq r5, r4
 	bf 1f
+
+	mova sce0_msg_bootmenu, r0
+	mov r0, r4
+	mov.l sce0_send_str_addr, r0
+	jsr @r0
+	nop
+
 	mov.l sce0_jump_addr, r0
 	jsr @r0
 	nop
@@ -117,7 +124,10 @@ syscall_8c0000e0:
 	nop
 
 	.align 4
-	sce0_jump_addr: .long 0x8c010000
+	sce0_jump_addr: .long 0xa0000000
+	sce0_send_str_addr: .long send_str
+	sce0_msg_bootmenu: .asciz "fakebootrom: Just pretend we are returning to the boot menu\n"
+
 
 ! generic error handler for unimplemented syscalls
 	.align 4

@@ -13,6 +13,9 @@ Maple::Maple(class SHCpu *cpu)
 	gamepad.suppFuncs = Overlord::switchEndian(MAPLE_CONTROLLER);
 	gamepad.standbyPower = 1; // this is completely made up
 	gamepad.maxPower = 2; // so is this
+
+	for(int i=0; i<sizeof(buttonState); i++)
+		buttonState[i] = 0;
 }
 
 Maple::~Maple()
@@ -59,7 +62,6 @@ Dword Maple::hook(int eventType, Dword addr, Dword data)
 				{
 					int cmd, recipient, sender, addtlwords, last, port, length;
 					// XXX: finish me!
-					// now we need to get the byte there
 					Dword transferDesc1 = cpu->mmu->access(dmaAddr, MMU_READ_DWORD);
 					Dword transferDesc2 = cpu->mmu->access(dmaAddr+4, MMU_READ_DWORD);
 					Dword frameHeader = cpu->mmu->access(dmaAddr+8, MMU_READ_DWORD);
@@ -88,17 +90,55 @@ Dword Maple::hook(int eventType, Dword addr, Dword data)
 					{
 					case MAPLE_REQ_DEVICE_INFO:
 						cpu->debugger->print("Maple: request device info of %02x (on port %d)\n", recipient, Overlord::bits(recipient, 7, 6));
-						// XXX: we're going to pretend that our gamepad is connected to every
-						// address on the maple bus with the exception of where the DC itself would be
-						if((recipient & 0x1f) != 0) // if it isn't the DC itself...
+						// if we are being asked about A0
+						if(recipient == (D5))
 						{ // ...then say there's a gamepad connected
+							// printf("resultaddr %08x\n", resultAddr);
+							FrameHeader fh;
+							fh.command = MAPLE_DEVICE_INFO_RESP;
+							fh.recipient = sender;
+							fh.sender = recipient;
+							fh.numWordsFollowing = sizeof(DeviceInfo) / 4;
+							cpu->mmu->writeDwordToExternal(resultAddr, *((Dword*)&fh));
 							for(int i=0; i<(sizeof(DeviceInfo) / 4); i++)
-								cpu->mmu->writeDwordToExternal(resultAddr+i*4, ((Dword*)&gamepad)[i]);
+								cpu->mmu->writeDwordToExternal(resultAddr+i*4+4, ((Dword*)&gamepad)[i]);
+						}	else
+						{
+							FrameHeader fh;
+							fh.command = MAPLE_NORESP_ERR;
+							cpu->mmu->writeDwordToExternal(resultAddr, *((Dword*)&fh));
 						}
 						break;
 
 					case MAPLE_GET_CONDITION:
 						cpu->debugger->print("Maple: get condition of %02x (on port %d)\n", recipient, Overlord::bits(recipient, 7, 6));
+						cpu->overlord->handleEvents();
+						//printf("%08x params[0]=%08x\n", dmaAddr, cpu->mmu->access(dmaAddr+4, MMU_READ_DWORD));
+						// are we asking about our lone gamepad?
+						// then say what buttons are down
+						if(recipient == D5)
+						{
+							FrameHeader fh;
+							fh.command = MAPLE_DATA_TRANSFER_RESP;
+							fh.recipient = sender;
+							fh.sender = recipient;
+							fh.numWordsFollowing = 2;
+							cpu->mmu->writeDwordToExternal(resultAddr, *((Dword*)&fh));
+							Dword cond = 0xffffffff;
+							if(buttonState[BUTTON_START] == 1)
+							{
+								printf("Start button pressed - resultAddr = %08x\n", resultAddr);
+								cond &= ~D3;
+							}
+							cpu->mmu->writeDwordToExternal(resultAddr+4, Overlord::switchEndian(MAPLE_CONTROLLER));
+							//cpu->mmu->writeDwordToExternal(resultAddr+8, Overlord::switchEndian(cond));
+							cpu->mmu->writeDwordToExternal(resultAddr+8, cond);
+						} else
+						{
+							FrameHeader fh;
+							fh.command = MAPLE_NORESP_ERR;
+							cpu->mmu->writeDwordToExternal(resultAddr, *((Dword*)&fh));
+						}
 						break;
 					}
 				}
