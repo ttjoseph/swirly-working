@@ -130,7 +130,7 @@ MICO_INCLUDES = @MICO_INCLUDES@
 MICO_LDFLAGS = @MICO_LDFLAGS@
 MOC = @MOC@
 MSGFMT = @MSGFMT@
-NOOPT_CXXFLAGS =  -O3 -Wall -funroll-loops -fschedule-insns2 -march=k6
+NOOPT_CXXFLAGS =  -O3 -Wall -funroll-loops -fschedule-insns2
 NOREPO = -fno-repo
 OBJDUMP = @OBJDUMP@
 OBJEXT = o

@@ -130,7 +130,7 @@ MICO_INCLUDES = @MICO_INCLUDES@
 MICO_LDFLAGS = @MICO_LDFLAGS@
 MOC = @MOC@
 MSGFMT = @MSGFMT@
-NOOPT_CXXFLAGS =  -O3 -Wall -funroll-loops -fschedule-insns2 -march=k6
+NOOPT_CXXFLAGS =  -O3 -Wall -funroll-loops -fschedule-insns2
 NOREPO = -fno-repo
 OBJDUMP = @OBJDUMP@
 OBJEXT = o
@@ -214,12 +214,12 @@ SHTmu.$(OBJEXT) SHSci.$(OBJEXT) SHMmu.$(OBJEXT) SHIntc.$(OBJEXT) \
 SHDmac.$(OBJEXT) SHCpu.$(OBJEXT) SHBsc.$(OBJEXT) Overlord.$(OBJEXT) \
 Maple.$(OBJEXT) Gpu.$(OBJEXT) Gdrom.$(OBJEXT) Debugger.$(OBJEXT)
 swirly_DEPENDENCIES = 
-CXXFLAGS =  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6 
+CXXFLAGS =  -O3 -Wall   -funroll-loops -fschedule-insns2 
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
-CFLAGS =  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6 
+CFLAGS =  -O3 -Wall   -funroll-loops -fschedule-insns2 
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)

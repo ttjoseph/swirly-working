@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	atexit(SDL_Quit);
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 
-	SDL_Surface *icon = SDL_LoadBMP("/mnt/d/dc/sandbox/swirly-icon.ico");
+	SDL_Surface *icon = SDL_LoadBMP("../misc/swirly-icon.ico");
 	if(icon != NULL)
 		SDL_WM_SetIcon(icon, NULL);
 
@@ -43,30 +43,28 @@ int main(int argc, char *argv[])
 
 	// load the boot ROM
 	printf("Loading boot ROM...");
-	o->load("/mnt/d/dc/sandbox/fbr.bin", 0xA0000000);
+	o->load("../fakebootrom/fbr.bin", 0xA0000000);
 	//o->load("bootrom.bin", 0xA0000000);
 	printf("done.\n");
 
 	// load the flash memory
-	printf("Loading flash...");
-	o->loadToHost("/mnt/d/dc/sandbox/flash", (Dword) cpu->mmu->flash);
+	printf("Loading flash (nonessential image)...");
+	o->loadToHost("../images/flash", (Dword) cpu->mmu->flash);
 	printf("done.\n");
 
 	// load the images we're going to run
 	printf("Loading images...");
 	//o->loadIso("ip.bin", 0x8c008000);
-	o->load("/home/tom/dc/images/fun_ip.bin", 0x8c008000);
+	o->load("../images/IP.BIN", 0x8c008000);
 	//o->load("/mnt/d/dc/sandbox/3dtest.bin", 0x8c010000);
 	//o->load("/home/tom/dc/dc-progs/tatest/tatest.1stread_unscrambled.bin", 0x8c010000);
 	//o->loadSrec("/home/tom/dc/dc-progs/tatest/tatest.srec");
-	o->loadSrec("/home/tom/dc/dc-progs/stars_bin/stars.srec");
+	o->loadSrec("../images/stars.srec");
 	//cpu->gdrom->load("../images/dccdx-fixed.iso");
 	printf("done.\n");
 
 	printf("Fasten your seatbelts.\n\n");
 	// PC should be 0xA0000000 at this point
-	// cpu->debugger->dispatchCommand("bx 8c0090b4\n");
-	// cpu->debugger->promptOn = false;
 	cpu->go();
 
 	SDL_FreeSurface(icon); // as if we ever reach here anyway...

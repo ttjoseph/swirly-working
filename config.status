@@ -36,9 +36,9 @@ sed 's/%@/@@/; s/@%/@@/; s/%g$/@g/; /@g$/s/[\\&%]/\\&/g;
 /^[ 	]*VPATH[ 	]*=[^:]*$/d
 
 s%@SHELL@%/bin/sh%g
-s%@CFLAGS@% -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6 %g
+s%@CFLAGS@% -O3 -Wall   -funroll-loops -fschedule-insns2 %g
 s%@CPPFLAGS@%%g
-s%@CXXFLAGS@% -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6 %g
+s%@CXXFLAGS@% -O3 -Wall   -funroll-loops -fschedule-insns2 %g
 s%@FFLAGS@%%g
 s%@DEFS@%-DHAVE_CONFIG_H%g
 s%@LDFLAGS@%  %g
@@ -89,7 +89,7 @@ s%@CPP@%gcc -E%g
 s%@CXX@%g++%g
 s%@USE_EXCEPTIONS@%-fexceptions%g
 s%@USE_RTTI@%-frtti%g
-s%@NOOPT_CXXFLAGS@% -O3 -Wall -funroll-loops -fschedule-insns2 -march=k6%g
+s%@NOOPT_CXXFLAGS@% -O3 -Wall -funroll-loops -fschedule-insns2%g
 s%@KDE_USE_FINAL_TRUE@%#%g
 s%@KDE_USE_FINAL_FALSE@%%g
 s%@REPO@%-frepo%g

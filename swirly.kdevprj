@@ -14,7 +14,7 @@ install=false
 install_location=
 type=DATA
 [Config for BinMakefileAm]
-addcxxflags=-funroll-loops -fschedule-insns2 -march=k6
+addcxxflags=-funroll-loops -fschedule-insns2
 bin_program=swirly
 cxxflags= -O3 -Wall
 ldadd=-lSDL -lGL

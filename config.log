@@ -14,17 +14,17 @@ configure:869: checking for working autoheader
 configure:882: checking for working makeinfo
 configure:944: checking for a C-Compiler
 configure:950: checking for gcc
-configure:1056: checking whether the C compiler (gcc  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6    ) works
-configure:1072: gcc -o conftest  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6      conftest.c  1>&5
+configure:1056: checking whether the C compiler (gcc  -O3 -Wall   -funroll-loops -fschedule-insns2    ) works
+configure:1072: gcc -o conftest  -O3 -Wall   -funroll-loops -fschedule-insns2      conftest.c  1>&5
 configure:1069: warning: return-type defaults to `int'
-configure:1098: checking whether the C compiler (gcc  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6    ) is a cross-compiler
+configure:1098: checking whether the C compiler (gcc  -O3 -Wall   -funroll-loops -fschedule-insns2    ) is a cross-compiler
 configure:1103: checking whether we are using GNU C
 configure:1180: checking how to run the C preprocessor
 configure:1242: checking for a C++-Compiler
 configure:1248: checking for g++
-configure:1364: checking whether the C++ compiler (g++  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6    ) works
-configure:1380: g++ -o conftest  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6      conftest.C  1>&5
-configure:1406: checking whether the C++ compiler (g++  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6    ) is a cross-compiler
+configure:1364: checking whether the C++ compiler (g++  -O3 -Wall   -funroll-loops -fschedule-insns2    ) works
+configure:1380: g++ -o conftest  -O3 -Wall   -funroll-loops -fschedule-insns2      conftest.C  1>&5
+configure:1406: checking whether the C++ compiler (g++  -O3 -Wall   -funroll-loops -fschedule-insns2    ) is a cross-compiler
 configure:1411: checking whether we are using GNU C++
 configure:1643: checking whether g++ supports -fexceptions
 configure:1677: checking whether g++ supports -frtti
@@ -46,16 +46,16 @@ ltconfig:563:checking for g++ option to produce PIC
 ltconfig:693:checking that g++ PIC flag  -fPIC works.
 ltconfig:754: checking if g++ static flag -static works
 ltconfig:799: checking if g++ supports -c -o file.o
-ltconfig:800: g++ -c  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6  -o out/conftest2.o  conftest.c 1>&5
+ltconfig:800: g++ -c  -O3 -Wall   -funroll-loops -fschedule-insns2  -o out/conftest2.o  conftest.c 1>&5
 ltconfig:832: checking if g++ supports -c -o file.lo
-ltconfig:833: g++ -c  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6  -c -o conftest.lo  conftest.c 1>&5
+ltconfig:833: g++ -c  -O3 -Wall   -funroll-loops -fschedule-insns2  -c -o conftest.lo  conftest.c 1>&5
 ltconfig:884: checking if g++ supports -fno-rtti -fno-exceptions
-ltconfig:885: g++ -c  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6  -fno-rtti -fno-exceptions -c conftest.c  conftest.c 1>&5
+ltconfig:885: g++ -c  -O3 -Wall   -funroll-loops -fschedule-insns2  -fno-rtti -fno-exceptions -c conftest.c  conftest.c 1>&5
 ltconfig:1867: checking if global_symbol_pipe works
-ltconfig:1868: g++ -c  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6   conftest.c 1>&5
+ltconfig:1868: g++ -c  -O3 -Wall   -funroll-loops -fschedule-insns2   conftest.c 1>&5
 conftest.c:9: warning: ANSI C++ forbids declaration `main' with no type
 ltconfig:1871: eval "/usr/bin/nm -B conftest.o | sed -n -e 's/^.*[ 	]\([ABCDGISTW]\)[ 	][ 	]*\(\)\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2\3 \3/p' > conftest.nm"
-ltconfig:1923: g++ -o conftest  -O3 -Wall   -funroll-loops -fschedule-insns2 -march=k6  -fno-builtin -fno-rtti -fno-exceptions     conftest.c conftstm.o 1>&5
+ltconfig:1923: g++ -o conftest  -O3 -Wall   -funroll-loops -fschedule-insns2  -fno-builtin -fno-rtti -fno-exceptions     conftest.c conftstm.o 1>&5
 ltconfig:2269: checking for dlfcn.h
 ltconfig:2307: checking whether a program can dlopen itself
 configure:2875: checking for dlopen in -ldl
