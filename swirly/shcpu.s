@@ -11,20 +11,27 @@ shcpu_DO_MACL:
 	push ebp
 	mov ebp, esp
 
+	; multiply rm and rn
 	fild dword [ebp + 8]
 	fild dword [ebp + 12]
 	fmulp st1
 
+	; add the result to mach:macl
 	mov eax, [ebp + 16] ; get mach
-	mov eax, [eax]
+	mov ecx, [eax]
 	mov ebx, [ebp + 20] ; get macl
-	mov ebx, [ebx]
-	mov [g_tmpQword], ebx ; low dword
-	mov [g_tmpQword + 4], eax ; high dword
+	mov edx, [ebx]
+	mov [g_tmpQword], edx ; low dword
+	mov [g_tmpQword + 4], ecx ; high dword
 	fild qword [g_tmpQword]
 	faddp st1
 
+	; copy answer into mach and macl
 	fistp qword [g_tmpQword]
+	mov ecx, [g_tmpQword + 4] ; hi
+	mov edx, [g_tmpQword] ; lo
+	mov [eax], ecx
+	mov [ebx], edx
 
 	leave
 	ret

@@ -1,6 +1,6 @@
-// Maple bus header file
 #ifndef _MAPLE_H_
 #define _MAPLE_H_
+// Maple bus header file
 
 #include "swirly.h"
 #include "SHCpu.h"
@@ -53,7 +53,7 @@ public:
 		Word standbyPower; // standby power consumption - little endian
 		Word maxPower; // maximum power consumption - little endian
 	};
-	
+
 	struct FrameHeader
 	{
 		Byte command;
@@ -61,17 +61,18 @@ public:
 		Byte sender;
 		Byte numWordsFollowing;
 	};
-		
+
 	Maple(class SHCpu *cpu);
 	virtual ~Maple();
-		
-	Dword hook(int eventType, Dword addr, Dword data);			
-	
+
+	Dword hook(int eventType, Dword addr, Dword data);
+
 	class SHCpu *cpu;
 
 private:
 	Maple() {}
 	Dword dmaAddr;
+	DeviceInfo gamepad;
 };
 
 #endif

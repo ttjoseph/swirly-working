@@ -261,7 +261,7 @@ bool Overlord::loadSrec(char *fname)
 		while(type[0] != 'S')
 			fread(&type, 1, 2, fp);
 
-		
+
 		fread(&count, 1, 2, fp);
 		type[2] = count[2] = 0; // null terminate
 		//convertSrecBytes(count, (char*)&numBytes, 1); 

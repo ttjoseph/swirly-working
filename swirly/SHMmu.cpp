@@ -75,6 +75,14 @@ void SHMmu::writeDword(Dword addr, Dword d)
 	access(translateVirtual(addr), MMU_WRITE_DWORD);
 }
 
+void SHMmu::writeDwordToExternal(Dword addr, Dword d)
+{
+	eventType = MMU_WRITE_DWORD;
+	tempData = d;
+	accessAddr = addr;
+	access(addr, MMU_WRITE_DWORD);
+}
+
 void SHMmu::writeDouble(Dword addr, Double d)
 {
 	cpu->debugger->flamingDeath("writeDouble not implemented yet");

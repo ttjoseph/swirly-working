@@ -60,6 +60,7 @@ public:
 	void writeDouble(Dword addr, Double d);
 	Word fetchInstruction(Dword addr);
 	void writeDword(Dword addr, Dword d);
+	void writeDwordToExternal(Dword addr, Dword d);
 	void writeWord(Dword addr, Word d);
 	void writeByte(Dword addr, Byte d);
 	Dword readDword(Dword addr);
@@ -73,7 +74,7 @@ public:
 
 private:
   SHMmu() {}
-	
+
 	int searchItlb(Dword addr);
 	void updateMmucrUrc();
 	int searchUtlb(Dword addr);
@@ -83,7 +84,7 @@ private:
 
 	int eventType; // used internally to decide what exception to raise
 	Dword tempData, accessAddr;
-	
+
 	// TLB
 	Dword UTLB_Addr[64];
 	Dword UTLB_Data1[64];
@@ -94,9 +95,6 @@ private:
 
 	// Store queues
 	Dword SQ0[8], SQ1[8];
-	
-	// local TLB - caches output of translateVirtual
-
 };
 
 #endif

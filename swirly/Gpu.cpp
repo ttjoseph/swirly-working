@@ -183,8 +183,8 @@ void Gpu::makeScreen()
 	if(bbNum >= MAXBACKBUFFERS)
 		cpu->debugger->flamingDeath("Gpu::makeScreen: too many back buffers allocated!");
 
-	printf("**** Gpu::makeScreen: RESETTING VIDEO MODE! ****\n");
-	printf("New back buffer video base: %08X\n", vidbase);
+	printf("Gpu::makeScreen: resetting video mode - ");
+	printf("new back buffer video base: %08X\n", vidbase);
 
 	backBuffers[bbNum] = SDL_CreateRGBSurfaceFrom(
 		(void*)(((Dword)cpu->mmu->videoMem)+vidbase),

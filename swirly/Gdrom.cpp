@@ -26,34 +26,34 @@ void Gdrom::hook()
 	{
 		case GDROM_EXECSERVER:
 			// start executing commands
-			printf("GDROM_EXECSERVER\n");
+			printf("Gdrom: syscall: GDROM_EXECSERVER\n");
 			break;
 		case GDROM_INITSYSTEM:
 			// this is a nop for us
-			printf("GDROM_INITSYSTEM\n");
+			printf("Gdrom: syscall: GDROM_INITSYSTEM\n");
 			break;
 		case GDROM_GETDRVSTAT:
 			// get type of disc
 			// r4 = addr of param block
 			// XXX: what is the structure of the param block?
-			printf("GDROM_GETDRVSTAT\n");
+			printf("Gdrom: syscall: GDROM_GETDRVSTAT\n");
 			// we'll pretend we have an XA disc
 			cpu->mmu->writeDword(cpu->R[4]+4, 32);
 			break;
 		case GDROM_G1DMAEND:
-			printf("GDROM_G1DMAEND\n");
+			printf("Gdrom: syscall: GDROM_G1DMAEND\n");
 			break;
 		case GDROM_REQDMATRANS:
-			printf("GDROM_REQDMATRANS\n");
+			printf("Gdrom: syscall: GDROM_REQDMATRANS\n");
 			break;
 		case GDROM_CHECKDMATRANS:
-			printf("GDROM_CHECKDMATRANS\n");
+			printf("Gdrom: syscall: GDROM_CHECKDMATRANS\n");
 			break;
 		case GDROM_READABORT:
-			printf("GDROM_READABORT\n");
+			printf("Gdrom: syscall: GDROM_READABORT\n");
 			break;
 		case GDROM_RESET:
-			printf("GDROM_RESET\n");
+			printf("Gdrom: syscall: GDROM_RESET\n");
 			break;
 		case GDROM_CHANGEDATATYPE:
 			// sets the format of the disc
@@ -63,7 +63,7 @@ void Gdrom::hook()
 			// param[2]: 2048 = mode1, 1024=mode2
 			// param[3]: sector size
 			// r4 = addr of param block
-			printf("GDROM_CHANGEDATATYPE\n");
+			printf("Gdrom: syscall: GDROM_CHANGEDATATYPE\n");
 			{
 				int operation = cpu->mmu->readDword(cpu->R[4]);
 				if(operation == 1)
@@ -78,13 +78,13 @@ void Gdrom::hook()
 			// r5 = addr of param block
 			// return 1 if still pending
 			// return 2 if done
-			printf("GDROM_GETCMDSTAT\n");
+			printf("Gdrom: syscall: GDROM_GETCMDSTAT\n");
 			cpu->R[0] = 2;
 			break;
 		case GDROM_REQCMD:
 			// adds a command to the GDROM command queue?
 			// r4=cmd, r5=addr of param block
-			printf("GDROM_REQCMD ");
+			printf("Gdrom: syscall: GDROM_REQCMD ");
 			switch(cpu->R[4])
 			{
 				case GDROM_CMD_INIT:
@@ -99,12 +99,12 @@ void Gdrom::hook()
 					// The data track should have a ctrl of 4
 					// ctrl is found in the high 4 bits of track num
 					// LBA is the lower 3 bytes.  To get real sector number
-					// from LBA, add 150. 
-					printf("GDROM_CMD_READTOC");
+					// from LBA, add 150.
+					printf("Gdrom: syscall: GDROM_CMD_READTOC");
 					{
 						//Dword session = cpu->mmu->readDword(cpu->R[5]);
 						Dword tocBuffer = cpu->mmu->readDword(cpu->R[5]+4);
-						printf(" tocBuffer is at %08x", tocBuffer); 
+						printf(" tocBuffer is at %08x", tocBuffer);
 
 						Toc toc;
 						toc.first = 1 << 16;
@@ -130,13 +130,13 @@ void Gdrom::hook()
 						Dword buffer = cpu->mmu->readDword(cpu->R[5]+8);
 						printf(" start %u count %u buffer %08x sectorSize %d", start, count, buffer, sectorSize);
 						count *= sectorSize;
-						start = start - startSector;
+						start -= startSector;
 						start *= sectorSize;
 						printf(" really starting at %u bytes", start);
 						if(cdImage != NULL)
 							Overlord::load(cdImage, start, count, cpu, buffer);
 						else
-							printf("cdImage is null\n");
+							printf("cdImage is null");
 					}
 					break;
 				default:
