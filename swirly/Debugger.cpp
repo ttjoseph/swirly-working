@@ -38,7 +38,7 @@ Overlord::NumberName exceptionList[] =
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-Debugger::Debugger(class SHCpu *shcpu) : cpu(shcpu)
+Debugger::Debugger(class SHCpu *shcpu) : cpu(shcpu), branchTraceFile(NULL)
 {
 	// create the breakpoint list
 	breakpoints = new Breakpoint[DBG_MAXBREAKPOINTS];
@@ -48,10 +48,13 @@ Debugger::Debugger(class SHCpu *shcpu) : cpu(shcpu)
 	execBpSet = false;
 	memBpSet = false;
 	maxExecBp = maxMemBp = 0;
+	// XXX: until we add a debugger command to do this
 }
 
 Debugger::~Debugger()
 {
+	if(branchTraceFile)
+		fclose(branchTraceFile);
 	delete breakpoints;
 }
 
@@ -82,6 +85,29 @@ void Debugger::flamingDeath(char *fmt, ...)
 	exit(1);
 }
 
+// Reports a branch in execution so it can be logged to the
+// branch trace if needed.
+void Debugger::reportBranch(char *tag, Dword src, Dword dest)
+{
+	static Dword last_src = 0, last_dest = 0;
+	static int count = 0;
+
+	if(branchTraceFile)
+	{
+		if((last_src == src) && (last_dest == dest))
+			count++;
+		else
+		{
+			if(count > 0)
+				fprintf(branchTraceFile, "\trepeated %d times\n", count);
+			else
+				fprintf(branchTraceFile, "%08x: %s %08x\n", src, tag, dest);
+			count = 0;
+		}
+		last_src = src;
+		last_dest = dest;
+	}
+}
 
 // dumps registers
 void Debugger::dumpRegs()
@@ -211,6 +237,7 @@ bool Debugger::dispatchCommand(char *cmd)
 	DO_CMD("u", cmdU);
 	DO_CMD("df", cmdDf);
 	DO_CMD("uf", cmdUf);
+	DO_CMD("trb", cmdTrb);
 
 #undef DO_CMD
 	
@@ -313,6 +340,26 @@ bool Debugger::cmdD(char *cmd)
 		printf("\n");
 	}
 
+	return false;
+}
+
+// toggle branch tracing on and off
+bool Debugger::cmdTrb(char *cmd)
+{
+	if(branchTraceFile)
+	{
+		fprintf(branchTraceFile, 
+			"--> PC=%08X: Branch trace logging turned off <--\n", cpu->PC);
+		fclose(branchTraceFile);
+		branchTraceFile = NULL;
+		printf("Branch trace logging is off.\n");
+	} else
+	{
+		branchTraceFile = fopen("branch_trace.log", "a");
+		fprintf(branchTraceFile, 
+			"--> PC=%08X: Branch trace logging turned on <--\n", cpu->PC);
+		printf("Branch trace logging is on.\n");
+	}
 	return false;
 }
 

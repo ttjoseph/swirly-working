@@ -87,6 +87,7 @@
 extern "C"
 {
 void shfpu_setContext(float *FR, float *XF, float *FPUL, Dword *FPSCR);
+void shcpu_DO_MACL(Sdword rn, Sdword rm, Dword *mach, Dword *macl);
 void shfpu_sFLOAT();
 void shfpu_sFMUL();
 }

@@ -3,6 +3,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <string.h>
 #include <signal.h>
 #include "Gpu.h"
 #include "SHMmu.h"

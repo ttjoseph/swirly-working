@@ -45,25 +45,25 @@ Dword Maple::hook(int eventType, Dword addr, Dword data)
 			case 0xa05f6c18: // DMA start
 				if(data & 1) // if bit 0 is set, begin transfer
 				{
-					printf("Maple: begin DMA transfer from %08X\n", dmaAddr);
+					printf("Maple: DMA transfer from %08X: ", dmaAddr);
 					// XXX: finish me!
 					// now we need to get the byte there
 					Dword transferDesc1 = cpu->mmu->access(dmaAddr, MMU_READ_DWORD);
 					Dword transferDesc2 = cpu->mmu->access(dmaAddr+4, MMU_READ_DWORD);
 					Dword frameHeader = cpu->mmu->access(dmaAddr+8, MMU_READ_DWORD);
 					frameHeader = Overlord::switchEndian(frameHeader);
-					printf("LAST %d, PORT %d, LENGTH %d\n",
+					printf("LAST %d, PORT %d, LENGTH %d ",
 							Overlord::bits(transferDesc1, 31, 31),
 							Overlord::bits(transferDesc1, 17, 16),
 							Overlord::bits(transferDesc1, 7, 0));
 							
-					printf("Result address: %08X\n", transferDesc2);
+					printf("Result addr: %08X\n", transferDesc2);
 					
-					printf("Maple command %08X\n", frameHeader);
-					printf("command: %d\n", Overlord::bits(frameHeader, 31, 24));
-					printf("recipient: %d\n", Overlord::bits(frameHeader, 23, 16));
-					printf("sender: %d\n", Overlord::bits(frameHeader, 15, 8));
-					printf("additional words: %d\n", Overlord::bits(frameHeader, 7, 0));
+					printf("Maple: command %08X: ", frameHeader);
+					printf("cmd: %d ", Overlord::bits(frameHeader, 31, 24));
+					printf("recipient: %d ", Overlord::bits(frameHeader, 23, 16));
+					printf("sender: %d ", Overlord::bits(frameHeader, 15, 8));
+					printf("addtl words: %d\n", Overlord::bits(frameHeader, 7, 0));
 				}			
 		}
 

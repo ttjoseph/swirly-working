@@ -1,42 +1,45 @@
-/* Routines to help out with SH FPU implementation */
-.text
-.global shfpu_setContext, shfpu_sFLOAT, shfpu_sFMUL
-.extern shfpu_sop0, shfpu_sop1, shfpu_sresult
-.extern shfpu_dop0, shfpu_dop1, shfpu_dresult
+[bits 32]
+
+section .text
+
+global shfpu_setContext, shfpu_sFLOAT, shfpu_sFMUL
+extern shfpu_sop0, shfpu_sop1, shfpu_sresult
+extern shfpu_dop0, shfpu_dop1, shfpu_dresult
 
 shfpu_setContext:
-	push %ebp
-	mov %esp, %ebp
+	push ebp
+	mov ebp, esp
 	
-	movl 8(%ebp), %eax
-	movl 12(%ebp), %ebx
-	movl 16(%ebp), %ecx
-	movl 20(%ebp), %edx
-	movl %eax, (FR)
-	movl %ebx, (XF)
-	movl %ecx, (FPUL)
-	movl %edx, (FPSCR)
+	mov eax, [ebp + 8]
+	mov ebx, [ebp + 12]
+	mov ecx, [ebp + 16]
+	mov edx, [ebp + 20]
+	mov [FR], eax
+	mov [XF], ebx
+	mov [FPUL], ecx
+	mov [FPSCR], edx
 	
 	leave
 	ret
-
-// slower to put the fmul here instead of letting g++ make one in SHCpu...
+	
 shfpu_sFMUL:
-	fldl (shfpu_sop0)
-	fldl (shfpu_sop1)
-	fmulp %st(0), %st(1)
-	fstpl (shfpu_sresult)
+	fld dword [shfpu_sop0]
+	fld dword [shfpu_sop1]
+	fmulp st1
+	fstp dword [shfpu_sresult]
 	ret
-
+	
 shfpu_sFLOAT:
-	movl (FPUL), %eax
-	fildl (%eax)
-	fstpl (shfpu_sresult)
+	mov eax, [FPUL]
+	fild dword [eax]
+	fstp dword [shfpu_sresult]
 	ret
+	
+section .data
+FR dd 0
+XF dd 0
+FPUL dd 0
+FPSCR dd 0
 
-.data
-.align 4
-FR: .long 0
-XF: .long 0
-FPUL: .long 0
-FPSCR: .long 0
+
+	

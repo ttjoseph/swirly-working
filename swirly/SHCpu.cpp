@@ -87,6 +87,7 @@ void SHCpu::dispatchSwirlyHook()
 
 void SHCpu::unknownOpcode()
 {
+	printf("SHCpu: encountered unknown upcode at PC=%08X\n", PC);
 	PC+=2;
 }
 
@@ -150,7 +151,7 @@ void SHCpu:: TRAPA(Byte i)
 {
 	debugger->promptOn = true;
 	PC+=2;
-	/*
+	/* TODO: this gets uncommented when we do exceptions
 	SSR=SR;
 	SPC=PC+2;
 	SGR=R[15];
@@ -189,7 +190,7 @@ void SHCpu:: SWAPB(int m, int n)
 	R[n]=R[n]|t1|t0;
 	PC+=2;
 }
-	
+
 
 void SHCpu:: SUBV(int m, int n)
 {
@@ -305,7 +306,6 @@ void SHCpu:: STCDBR(int n)
 
 void SHCpu:: STCRBANK(int m, int n)
 {
-	// m = src, n = dest
 	R[n]=RBANK[m];
 	PC+=2;
 }
@@ -490,6 +490,7 @@ void SHCpu:: SETS()
 void SHCpu:: RTS()
 {
 	delaySlot();
+	debugger->reportBranch("rts", PC, PR);
 	PC=PR;
 }	
 
@@ -497,6 +498,7 @@ void SHCpu:: RTE() // privileged
 {
 	delaySlot();
 	setSR(SSR);
+	debugger->reportBranch("rte", PC, SPC);
 	PC=SPC;
 }
 
@@ -929,6 +931,7 @@ void SHCpu:: MACW(int m, int n)
 
 void SHCpu:: DO_MACL(int m, int n)
 {
+/*
 	Dword rnl, rnh, rml, rmh, r0, r1, r2, t0, t1, t2, t3;
 	Sdword tm, tn, fnlml;
 	tn=(Sdword)mmu->readDword(R[n]);
@@ -991,8 +994,31 @@ void SHCpu:: DO_MACL(int m, int n)
 		MACL=r0;
 	}
 	PC+=2;
+	*/
+
+	debugger->flamingDeath("Untested MACL implementation invoked");
+	shcpu_DO_MACL(R[n], R[m], &MACH, &MACL);
+
+	if(S==1)
+	{
+		// do saturation at bit 48
+		switch(Overlord::bits(MACH, 31, 16))
+		{
+		case 0x0000:
+		case 0xffff:
+			break;
+		default:
+			if(MACH >> 31) // sign bit on?
+				MACH |= 0xffff0000;
+			else
+				MACH &= 0x0000ffff;
+		}
+	}
+	R[m]+=4;
+	R[n]+=4;
+	PC+=2;
 }
-	
+
 	
 void SHCpu:: LDSFPSCR(int n)
 {
@@ -1161,6 +1187,7 @@ void SHCpu:: JSR(int n)
 	delaySlot();
 	PR=oldpc+4;
 	
+	debugger->reportBranch("jsr", PC, temp);
 	PC=temp;
 }
 
@@ -1170,6 +1197,7 @@ void SHCpu:: JMP(int n)
 	temp = R[n];
 	delaySlot();
 	
+	debugger->reportBranch("jmp", PC, temp);
 	PC=temp;
 }	
 
@@ -1477,7 +1505,10 @@ void SHCpu:: BTS(Byte d)
 	oldpc = PC;
 	delaySlot();
 	if((SR & F_SR_T)==1)
+	{
+		debugger->reportBranch("bts", PC, dest);
 		PC=dest;
+	}
 	else
 		PC=oldpc+4;
 }
@@ -1487,7 +1518,10 @@ void SHCpu:: BT(Byte d) // no delay slot!
 	Dword dest;
 	dest = PC + 4 + (((Sdword) (Sbyte) d) * 2);
 	if((SR & F_SR_T)==1)
+	{
+		debugger->reportBranch("bt", PC, dest);
 		PC=dest;
+	}
 	else
 		PC+=2;
 }
@@ -1499,6 +1533,7 @@ void SHCpu:: BSRF(int n)
 	oldpc = PC;
 	delaySlot();
 	PR=oldpc+4;
+	debugger->reportBranch("bsrf", PC, dest);
 	PC=dest;
 }
 
@@ -1513,6 +1548,7 @@ void SHCpu:: BSR(Sword d)
 	oldpc=PC;
 	delaySlot();
 	PR=oldpc+4;
+	debugger->reportBranch("bsr", PC, dest);
 	PC=dest;
 }
 
@@ -1521,6 +1557,7 @@ void SHCpu:: BRAF(int n)
 	Dword dest;
 	dest = PC+4+(Sdword)R[n];
 	delaySlot();
+	debugger->reportBranch("braf", PC, dest);
 	PC=dest;
 }
 
@@ -1533,6 +1570,7 @@ void SHCpu:: BRA(Sword d)
 		d|=0xfffff000;
 	dest = PC+4+(Sdword)(Sword)(d<<1);
 	delaySlot();
+	debugger->reportBranch("bra", PC, dest);
 	PC=dest;
 }
 
@@ -1543,7 +1581,10 @@ void SHCpu:: BFS(Byte d)
 	oldpc = PC;
 	delaySlot();
 	if((SR & F_SR_T)==0)
+	{
+		debugger->reportBranch("bfs", PC, dest);
 		PC=dest;
+	}
 	else
 		PC=oldpc+4;
 }
@@ -1553,8 +1594,10 @@ void SHCpu:: BF(Byte d) // no delay slot!
 	Dword dest;
 	dest = PC + 4 + (((Sdword) (Sbyte) d) * 2);
 	if((SR & F_SR_T)==0)
+	{
+		debugger->reportBranch("bf", PC, dest);
 		PC=dest;
-
+	}
 	else
 		PC+=2;
 }

@@ -277,7 +277,7 @@ bool Overlord::loadSrec(char *fname)
 				fread(desc, 1, 4, fp); // throw out 4 bytes of address
 				fread(desc, 1, numBytes*2, fp);
 				convertSrecBytes(desc, desc, numBytes);
-				printf("SREC: %s\n", desc);
+				// printf("SREC: %s\n", desc);
 				delete desc;
 				break;
 			}

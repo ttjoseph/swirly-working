@@ -11,7 +11,7 @@
 #include <SDL/SDL.h>
 
 #define MAXBACKBUFFERS 8
-class Gpu  
+class Gpu
 {
 public:
 	void recvStoreQueue(Dword *sq);
@@ -23,7 +23,7 @@ public:
 	virtual ~Gpu();
 
 	class SHCpu *cpu;
-	
+
 
 private:
 	Gpu() {}
@@ -33,7 +33,7 @@ private:
 	Dword accessReg(int operation, Dword addr, Dword data);
 	void makeScreen();
 	inline Dword switchEndian(Dword d);
-	
+
 	SDL_Surface *screen, *backBuffer, *backBuffers[MAXBACKBUFFERS];
 	Dword backBufferDCAddrs[MAXBACKBUFFERS];
 	int nextBackBuffer, currentBackBuffer;

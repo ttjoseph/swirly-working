@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 
 	// SIGINT isn't supposed to work on Win32 so we won't even try
 #ifndef _WIN32
-	signal(SIGINT, sigintHandler); // so we can hit Ctrl+C in Linux to exit
+	signal(SIGINT, sigintHandler); // so we can hit Ctrl+C in *nix to exit
 #endif
 	signal(SIGSEGV, onDeath);
 	
@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 	//o->load("/home/tom/dc/dc-progs/tatest/tatest.1stread_unscrambled.bin", 0x8c010000);
 	//o->loadSrec("/home/tom/dc/dc-progs/tatest/tatest.srec");
 	o->loadSrec("../images/stars.srec");
+	//o->load("../images/files/1ST_READ.BIN", 0x8c010000);
 	//cpu->gdrom->load("../images/dccdx-fixed.iso");
 	printf("done.\n");
 
