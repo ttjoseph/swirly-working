@@ -3,8 +3,8 @@
 	automatic type conversion.  Also it ought to be faster.
 - Optimize memory accesses.  Perhaps have a "TLB" that caches the host addresses of
   recently accessed SH memory.  On a per-page basis?
-	
-	
+  	- Think about this one.  We already have a couple TLBs and adding another one
+  	  probably won't speed it up.	
 - Finish that FPU! Do 64-bit floats work?
 	- Matrix instructions
 	- Debugger commands to support double-precision stuff
@@ -14,8 +14,6 @@
 	- Design: setupGL(), drawFrame(), and makeScreen() in Gpu could be named better.  For
 	  example, setupGL has a bad name because in addition to setting up OpenGL it also does
 	  GL buffer swapping, when it seems that drawFrame() should do that.
-- Find a way to remove those temp files used when descrambling -- or don't even use temp files
-  in the first place.
 - Exceptions.
 	- Change SHCpu::go and Debugger because as it stands now each instruction is fetched twice
 	  whenever the debugger prompt is used.  We don't want the debugger prompt triggering

@@ -9,7 +9,8 @@ Quickstart
 
 First get the latest SDL runtime from http://www.libsdl.org and install it.
 
-You need to provide an IP.BIN for Swirly to run.  Swirly comes with a boot ROM image and
+You need to provide an IP.BIN for Swirly to run.  Marcus Comstedt's IP.BIN creator
+works - get it at http://mc.pp.se/dc.  Swirly comes with a boot ROM image and
 a sample program to run.
 
 *** Swirly CANNOT run commercial games! ***
@@ -93,3 +94,9 @@ the cause of amateur Dreamcast hackers who want to write demos and such for the 
 Neither Swirly nor I have anything to do with the "warez" scene and I have no intent
 to unlawfully use Sega's or anybody else's intellectual property.  I don't know how to copy
 GDROMs or any of that crap so don't ask.
+
+Thanks
+------
+
+Marcus Comstedt, Dan Potter, Lars Olsson - for their excellent hacking efforts and code.
+
