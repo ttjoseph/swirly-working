@@ -56,11 +56,9 @@ int main(int argc, char *argv[])
 	printf("Loading images...");
 	//o->loadIso("ip.bin", 0x8c008000);
 	o->load("../images/swirly-ip.bin", 0x8c008000);
-	//o->load("/mnt/d/dc/sandbox/3dtest.bin", 0x8c010000);
-	//o->load("/home/tom/dc/dc-progs/tatest/tatest.1stread_unscrambled.bin", 0x8c010000);
-	//o->loadSrec("/home/tom/dc/dc-progs/tatest/tatest.srec");
 	o->loadSrec("../images/stars.srec");
-	//o->load("../images/files/1ST_READ.BIN", 0x8c010000);
+	//o->loadSrec("../images/mapletest.srec");
+	//o->loadSrec("../images/videotest.srec");
 	//cpu->gdrom->load("../images/dccdx-fixed.iso");
 	printf("done.\n");
 

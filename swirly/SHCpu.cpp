@@ -1503,14 +1503,17 @@ void SHCpu:: BTS(Byte d)
 	Dword dest, oldpc;
 	dest = PC + 4 + (((Sdword) (Sbyte) d) * 2);
 	oldpc = PC;
-	delaySlot();
 	if((SR & F_SR_T)==1)
 	{
+		delaySlot();
 		debugger->reportBranch("bts", PC, dest);
 		PC=dest;
 	}
 	else
+	{
+		delaySlot();
 		PC=oldpc+4;
+	}
 }
 
 void SHCpu:: BT(Byte d) // no delay slot!
@@ -1579,14 +1582,17 @@ void SHCpu:: BFS(Byte d)
 	Dword dest, oldpc;
 	dest = PC + 4 + (((Sdword) (Sbyte) d) * 2);
 	oldpc = PC;
-	delaySlot();
 	if((SR & F_SR_T)==0)
 	{
+		delaySlot();
 		debugger->reportBranch("bfs", PC, dest);
 		PC=dest;
 	}
 	else
+	{
+		delaySlot();
 		PC=oldpc+4;
+	}
 }
 
 void SHCpu:: BF(Byte d) // no delay slot!
